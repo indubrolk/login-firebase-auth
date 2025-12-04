@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { Link } from "react-router-dom";
 import { app } from "../../firebase/firebase";
 
 const auth = getAuth(app);
@@ -99,6 +100,12 @@ export default function SignUp() {
                     </p>
                 )}
             </form>
+            <p className="text-center text-sm text-slate-600">
+                Already have an account?{" "}
+                <Link to="/" className="font-semibold text-sky-700 hover:text-sky-800">
+                    Log in
+                </Link>
+            </p>
             </div>
         </div>
     );
