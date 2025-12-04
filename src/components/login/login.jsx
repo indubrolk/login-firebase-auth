@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { app } from "../firebase/firebase";
+import { app } from "../../firebase/firebase";
 import { Link } from "react-router-dom";
 
 const auth = getAuth(app);
