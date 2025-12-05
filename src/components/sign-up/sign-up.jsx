@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
@@ -30,9 +30,14 @@ export default function SignUp() {
             if (form.displayName.trim()) {
                 await updateProfile(credential.user, { displayName: form.displayName.trim() });
             }
-            setStatus({ loading: false, error: "", success: "Account created successfully." });
+            await sendEmailVerification(credential.user);
+            await signOut(auth);
+            setStatus({
+                loading: false,
+                error: "",
+                success: "Verification email sent. Verify your email, then sign in to continue.",
+            });
             setForm({ displayName: "", email: "", password: "" });
-            navigate("/dashboard", { replace: true });
         } catch (error) {
             setStatus({ loading: false, error: error.message || "Unable to sign up.", success: "" });
         }

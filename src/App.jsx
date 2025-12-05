@@ -6,10 +6,19 @@ import Dashboard from './components/dashboard/dashboard'
 import { useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }) {
-  const { user, initializing } = useAuth()
+  const { user, initializing, signOutUser } = useAuth()
 
   if (initializing) {
     return <div className="page-loading">Checking session...</div>
+  }
+
+  if (user && !user.emailVerified) {
+    return (
+      <div className="page-loading">
+        Please verify your email from your inbox, then sign in again.
+        <button className="ml-2 underline" onClick={signOutUser}>Sign out</button>
+      </div>
+    )
   }
 
   if (!user) {
