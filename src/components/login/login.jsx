@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -26,7 +26,19 @@ export default function Login() {
     setStatus({ loading: true, error: "", success: "" });
 
     try {
-      await signInWithEmailAndPassword(auth, form.email, form.password);
+      const credential = await signInWithEmailAndPassword(auth, form.email, form.password);
+
+      if (!credential.user.emailVerified) {
+        await sendEmailVerification(credential.user);
+        await signOut(auth);
+        setStatus({
+          loading: false,
+          error: "",
+          success: "Verification email sent. Please verify your email, then log in again.",
+        });
+        return;
+      }
+
       setStatus({ loading: false, error: "", success: "Login successful!" });
       setForm({ email: "", password: "" });
       navigate("/dashboard", { replace: true });
