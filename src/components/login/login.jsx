@@ -1,13 +1,20 @@
-import { useState } from "react";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { app } from "../../firebase/firebase";
-import { Link } from "react-router-dom";
-
-const auth = getAuth(app);
+import { useEffect, useState } from "react";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [status, setStatus] = useState({ loading: false, error: "", success: "" });
+  const { user, initializing } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!initializing && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, initializing, navigate]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -22,6 +29,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, form.email, form.password);
       setStatus({ loading: false, error: "", success: "Login successful!" });
       setForm({ email: "", password: "" });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setStatus({ loading: false, error: error.message, success: "" });
     }
@@ -29,65 +37,70 @@ export default function Login() {
 
   const handleForgotPassword = async () => {
     if (!form.email) {
-      setStatus({ ...status, error: "Enter your email to reset password." });
+      setStatus((prev) => ({ ...prev, error: "Enter your email to reset password." }));
       return;
     }
 
     try {
       await sendPasswordResetEmail(auth, form.email);
-      setStatus({ ...status, success: "Password reset email sent!" });
+      setStatus((prev) => ({ ...prev, success: "Password reset email sent!", error: "" }));
     } catch (error) {
-      setStatus({ ...status, error: error.message });
+      setStatus((prev) => ({ ...prev, error: error.message }));
     }
   };
 
   return (
-    <div className="login-form">
-      <h2>Login</h2>
+    <div className="login-wrapper">
+      <div className="login-card">
+        <div className="login-header">
+          <h2>Welcome back</h2>
+          <p>Sign in to continue to your dashboard.</p>
+        </div>
 
-      <form onSubmit={handleLogin}>
-        <label>
-          Email
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            autoComplete="email"
-            required
-          />
-        </label>
+        <form onSubmit={handleLogin} className="login-form">
+          <label>
+            <span>Email</span>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              autoComplete="email"
+              required
+            />
+          </label>
 
-        <label>
-          Password
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            autoComplete="current-password"
-            required
-          />
-        </label>
+          <label>
+            <span>Password</span>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete="current-password"
+              required
+            />
+          </label>
 
-        <button type="submit" disabled={status.loading}>
-          {status.loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <button type="submit" disabled={status.loading}>
+            {status.loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
 
-      {status.error && <p className="error-text">{status.error}</p>}
-      {status.success && <p className="success-text">{status.success}</p>}
+        {status.error && <p className="error-text">{status.error}</p>}
+        {status.success && <p className="success-text">{status.success}</p>}
 
-      <p className="forgot-text" onClick={handleForgotPassword} style={{ cursor: "pointer", color: "blue" }}>
-        Forgot Password?
-      </p>
+        <p className="forgot-text" onClick={handleForgotPassword}>
+          Forgot Password?
+        </p>
 
-      <p>
-        Don't have an account?{" "}
-        <Link to="/signup" style={{ color: "blue" }}>
-          Sign Up
-        </Link>
-      </p>
+        <p className="switch-auth">
+          Don&apos;t have an account?{" "}
+          <Link to="/signup">
+            Sign Up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
