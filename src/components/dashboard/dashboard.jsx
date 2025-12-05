@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import ProfileCard from "../profile-card/profile-card";
+import AccountCard from "../account-card/account-card";
 
 export default function Dashboard() {
   const { user, signOutUser } = useAuth();
@@ -8,7 +8,7 @@ export default function Dashboard() {
 
   const displayName = user?.displayName || user?.email || "User";
 
-  // Mock data for profile card - replace with real data from your backend
+  // Mock data for account card - replace with real data from your backend
   const profileData = {
     userName: displayName,
     accountNumber: "1234567890", // This will be masked as ****6789
@@ -34,7 +34,7 @@ export default function Dashboard() {
           Sign Out
         </button>
       </div>
-      <ProfileCard
+      <AccountCard
         userName={profileData.userName}
         accountNumber={profileData.accountNumber}
         accountType={profileData.accountType}
