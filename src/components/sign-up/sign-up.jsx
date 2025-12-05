@@ -1,13 +1,20 @@
-import { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { Link } from "react-router-dom";
-import { app } from "../../firebase/firebase";
-
-const auth = getAuth(app);
+import { useEffect, useState } from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../../firebase/firebase";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignUp() {
     const [form, setForm] = useState({ displayName: "", email: "", password: "" });
     const [status, setStatus] = useState({ loading: false, error: "", success: "" });
+    const { user, initializing } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!initializing && user) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [user, initializing, navigate]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -25,6 +32,7 @@ export default function SignUp() {
             }
             setStatus({ loading: false, error: "", success: "Account created successfully." });
             setForm({ displayName: "", email: "", password: "" });
+            navigate("/dashboard", { replace: true });
         } catch (error) {
             setStatus({ loading: false, error: error.message || "Unable to sign up.", success: "" });
         }
