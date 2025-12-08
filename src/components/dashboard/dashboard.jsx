@@ -30,7 +30,7 @@ export default function Dashboard() {
     boxShadow: "0 10px 24px rgba(0, 0, 0, 0.12)",
   };
 
-  // Mock data for profile card - replace with real data from your backend
+  // Mock data for account card - replace with real data from your backend
   const profileData = {
     userName: displayName,
     accountNumber: "1234567890", // This will be masked as ****6789
