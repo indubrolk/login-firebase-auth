@@ -5,10 +5,12 @@ import { auth } from "../../firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 
 export default function SignUp() {
-    const [form, setForm] = useState({ displayName: "", email: "", password: "" });
+    const [form, setForm] = useState({ displayName: "", email: "", password: "", phone: "", otp: "" });
     const [status, setStatus] = useState({ loading: false, error: "", success: "" });
+    const [phoneStatus, setPhoneStatus] = useState({ sending: false, error: "", success: "" });
     const { user, initializing } = useAuth();
     const navigate = useNavigate();
+    const apiBase = import.meta.env.VITE_API_BASE_URL || "";
 
     useEffect(() => {
         if (!initializing && user) {
@@ -21,11 +23,60 @@ export default function SignUp() {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
+    const maskPhone = (phone) => {
+        if (!phone || phone.length < 4) return phone || "";
+        return `****${phone.slice(-4)}`;
+    };
+
+    const handleSendOtp = async () => {
+        if (!form.phone) {
+            setPhoneStatus({ sending: false, error: "Enter phone with country code (e.g., +1XXXXXXXXXX).", success: "" });
+            return;
+        }
+
+        setPhoneStatus({ sending: true, error: "", success: "" });
+
+        try {
+            const response = await fetch(`${apiBase}/api/otp/send`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: form.phone, channel: "sms", purpose: "signup" }),
+            });
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || "Unable to send OTP.");
+            }
+            setPhoneStatus({
+                sending: false,
+                error: "",
+                success: `OTP sent to ${maskPhone(form.phone)}. Enter the 6-digit code.`,
+            });
+        } catch (error) {
+            setPhoneStatus({ sending: false, error: error.message || "Unable to send OTP.", success: "" });
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setStatus({ loading: true, error: "", success: "" });
+        setPhoneStatus((prev) => ({ ...prev, error: "" }));
+
+        if (!form.phone || !form.otp) {
+            setStatus({ loading: false, error: "Verify your phone with the OTP before creating the account.", success: "" });
+            return;
+        }
 
         try {
+            const verifyResponse = await fetch(`${apiBase}/api/otp/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: form.phone, code: form.otp, purpose: "signup" }),
+            });
+            if (!verifyResponse.ok) {
+                const message = await verifyResponse.text();
+                throw new Error(message || "Invalid OTP. Try again.");
+            }
+
             const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
             if (form.displayName.trim()) {
                 await updateProfile(credential.user, { displayName: form.displayName.trim() });
@@ -37,7 +88,8 @@ export default function SignUp() {
                 error: "",
                 success: "Verification email sent. Verify your email, then sign in to continue.",
             });
-            setForm({ displayName: "", email: "", password: "" });
+            setForm({ displayName: "", email: "", password: "", phone: "", otp: "" });
+            setPhoneStatus({ sending: false, error: "", success: "" });
         } catch (error) {
             setStatus({ loading: false, error: error.message || "Unable to sign up.", success: "" });
         }
@@ -81,6 +133,44 @@ export default function SignUp() {
                 </label>
 
                 <label className="block space-y-2">
+                    <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
+                        <span>Phone (with country code)</span>
+                        <button
+                            type="button"
+                            className="text-xs font-semibold text-sky-700 hover:text-sky-800 disabled:opacity-60"
+                            onClick={handleSendOtp}
+                            disabled={phoneStatus.sending}
+                        >
+                            {phoneStatus.sending ? "Sending..." : "Send code"}
+                        </button>
+                    </div>
+                    <input
+                        type="tel"
+                        name="phone"
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="+1XXXXXXXXXX"
+                        autoComplete="tel"
+                        className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2.5 text-slate-900 shadow-inner shadow-slate-100 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                        required
+                    />
+                </label>
+
+                <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-slate-700">OTP Code</span>
+                    <input
+                        type="text"
+                        name="otp"
+                        value={form.otp}
+                        onChange={handleChange}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2.5 text-slate-900 shadow-inner shadow-slate-100 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                        required
+                    />
+                </label>
+
+                <label className="block space-y-2">
                     <span className="text-sm font-semibold text-slate-700">Password</span>
                     <input
                         type="password"
@@ -102,9 +192,19 @@ export default function SignUp() {
                     {status.loading ? "Creating..." : "Sign Up"}
                 </button>
 
-                {status.error && (
+                    {status.error && (
+                        <p className="text-sm font-medium text-rose-600" aria-live="assertive">
+                            {status.error}
+                        </p>
+                    )}
+                {phoneStatus.error && (
                     <p className="text-sm font-medium text-rose-600" aria-live="assertive">
-                        {status.error}
+                        {phoneStatus.error}
+                    </p>
+                )}
+                {phoneStatus.success && (
+                    <p className="text-sm font-medium text-emerald-600" aria-live="polite">
+                        {phoneStatus.success}
                     </p>
                 )}
                 {status.success && (
