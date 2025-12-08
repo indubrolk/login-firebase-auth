@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "", phone: "", otp: "" });
+  const [form, setForm] = useState({ emailOrPhone: "", password: "", otp: "" });
   const [status, setStatus] = useState({ loading: false, error: "", success: "" });
   const [phoneStatus, setPhoneStatus] = useState({ sending: false, error: "", success: "" });
   const [phoneStep, setPhoneStep] = useState("idle");
@@ -24,19 +24,13 @@ export default function Login() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const maskPhone = (phone) => {
-    if (!phone || phone.length < 4) return phone || "";
-    const tail = phone.slice(-4);
-    return `****${tail}`;
-  };
-
-  const sendPhoneOtp = async (targetPhone) => {
+  const sendOtp = async (identifier) => {
     setPhoneStatus({ sending: true, error: "", success: "" });
     try {
       const response = await fetch(`${apiBase}/api/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: targetPhone, channel: "sms", purpose: "login" }),
+        body: JSON.stringify({ identifier, channel: "sms", purpose: "login" }),
       });
       if (!response.ok) {
         const message = await response.text();
@@ -46,7 +40,7 @@ export default function Login() {
       setPhoneStatus({
         sending: false,
         error: "",
-        success: `OTP sent to ${maskPhone(targetPhone)}. Enter the 6-digit code.`,
+        success: "OTP sent. Enter the 6-digit code.",
       });
     } catch (error) {
       setPhoneStatus({ sending: false, error: error.message || "Unable to send OTP.", success: "" });
@@ -60,12 +54,14 @@ export default function Login() {
     setPhoneVerified(false);
 
     try {
-      if (!form.phone) {
-        setStatus({ loading: false, error: "Enter your phone number to receive the OTP.", success: "" });
+      if (!form.emailOrPhone) {
+        setStatus({ loading: false, error: "Enter your email or phone.", success: "" });
         return;
       }
 
-      const credential = await signInWithEmailAndPassword(auth, form.email, form.password);
+      // Firebase email/password auth requires the email form; if a phone is entered,
+      // the backend should map it to the account when sending OTP.
+      const credential = await signInWithEmailAndPassword(auth, form.emailOrPhone, form.password);
 
       if (!credential.user.emailVerified) {
         await sendEmailVerification(credential.user);
@@ -78,7 +74,7 @@ export default function Login() {
         return;
       }
 
-      await sendPhoneOtp(form.phone);
+      await sendOtp(form.emailOrPhone);
       setStatus({
         loading: false,
         error: "",
@@ -90,7 +86,7 @@ export default function Login() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!form.phone || !form.otp) {
+    if (!form.emailOrPhone || !form.otp) {
       setPhoneStatus((prev) => ({
         ...prev,
         error: "Enter the OTP you received to continue.",
@@ -102,7 +98,7 @@ export default function Login() {
       const response = await fetch(`${apiBase}/api/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: form.phone, code: form.otp, purpose: "login" }),
+        body: JSON.stringify({ identifier: form.emailOrPhone, code: form.otp, purpose: "login" }),
       });
       if (!response.ok) {
         const message = await response.text();
@@ -111,7 +107,7 @@ export default function Login() {
 
       setPhoneVerified(true);
       setPhoneStatus({ sending: false, error: "", success: "Phone verified. Redirecting..." });
-      setForm({ email: "", password: "", phone: "", otp: "" });
+      setForm({ emailOrPhone: "", password: "", otp: "" });
       setTimeout(() => navigate("/dashboard", { replace: true }), 300);
     } catch (error) {
       setPhoneStatus({ sending: false, error: error.message || "Invalid OTP. Try again.", success: "" });
@@ -119,13 +115,13 @@ export default function Login() {
   };
 
   const handleForgotPassword = async () => {
-    if (!form.email) {
+    if (!form.emailOrPhone) {
       setStatus((prev) => ({ ...prev, error: "Enter your email to reset password." }));
       return;
     }
 
     try {
-      await sendPasswordResetEmail(auth, form.email);
+      await sendPasswordResetEmail(auth, form.emailOrPhone);
       setStatus((prev) => ({ ...prev, success: "Password reset email sent!", error: "" }));
     } catch (error) {
       setStatus((prev) => ({ ...prev, error: error.message }));
@@ -142,26 +138,13 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <label>
-            <span>Email</span>
+            <span>Email or phone</span>
             <input
-              type="email"
-              name="email"
-              value={form.email}
+              type="text"
+              name="emailOrPhone"
+              value={form.emailOrPhone}
               onChange={handleChange}
               autoComplete="email"
-              required
-            />
-          </label>
-
-          <label>
-            <span>Phone</span>
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              autoComplete="tel"
-              placeholder="+1XXXXXXXXXX"
               required
             />
           </label>
@@ -193,7 +176,7 @@ export default function Login() {
               type="button"
               className="secondary-btn"
               disabled={phoneStatus.sending}
-              onClick={() => form.phone && sendPhoneOtp(form.phone)}
+              onClick={() => form.emailOrPhone && sendOtp(form.emailOrPhone)}
             >
               {phoneStep === "otp-sent" ? "Resend code" : "Send OTP"}
             </button>

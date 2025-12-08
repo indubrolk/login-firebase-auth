@@ -16,10 +16,16 @@ export default function Dashboard() {
     background: "linear-gradient(135deg, #f5f7fb, #e8f0ff)",
   };
   const cardWrapperStyle = { width: "100%", maxWidth: "1100px" };
-  const signOutStyle = {
+  const headerBarStyle = {
     position: "fixed",
     top: 20,
     right: 20,
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    zIndex: 10,
+  };
+  const signOutStyle = {
     padding: "10px 16px",
     borderRadius: "10px",
     border: "none",
@@ -29,6 +35,22 @@ export default function Dashboard() {
     cursor: "pointer",
     boxShadow: "0 10px 24px rgba(0, 0, 0, 0.12)",
   };
+  const avatarStyle = {
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    backgroundColor: "#e2e8f0",
+    color: "#0f172a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 700,
+    boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+    overflow: "hidden",
+    border: "2px solid #fff",
+  };
+  const avatarImgStyle = { width: "100%", height: "100%", objectFit: "cover" };
+  const avatarInitial = (displayName || user?.email || "U").charAt(0).toUpperCase();
 
   // Mock data for account card - replace with real data from your backend
   const profileData = {
@@ -46,9 +68,18 @@ export default function Dashboard() {
 
   return (
     <div style={pageStyle}>
-      <button style={signOutStyle} onClick={handleSignOut}>
-        Sign Out
-      </button>
+      <div style={headerBarStyle}>
+        <div style={avatarStyle} aria-label="Profile avatar">
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="Profile avatar" style={avatarImgStyle} />
+          ) : (
+            avatarInitial
+          )}
+        </div>
+        <button style={signOutStyle} onClick={handleSignOut}>
+          Sign Out
+        </button>
+      </div>
       <div style={cardWrapperStyle}>
         <ProfileCard
           userName={profileData.userName}
