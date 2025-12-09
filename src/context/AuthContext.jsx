@@ -5,20 +5,16 @@ import { auth } from "../firebase/firebase";
 const AuthContext = createContext({
   user: null,
   initializing: true,
-  phoneVerified: false,
-  setPhoneVerified: () => {},
   signOutUser: async () => {},
 });
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
-  const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      setPhoneVerified(false); // reset per session until OTP verification passes
       setInitializing(false);
     });
     return unsubscribe;
@@ -28,11 +24,9 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       initializing,
-      phoneVerified,
-      setPhoneVerified,
       signOutUser: () => signOut(auth),
     }),
-    [user, initializing, phoneVerified]
+    [user, initializing]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

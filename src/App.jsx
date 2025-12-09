@@ -6,7 +6,7 @@ import Dashboard from './components/dashboard/dashboard'
 import { useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }) {
-  const { user, initializing, signOutUser, phoneVerified } = useAuth()
+  const { user, initializing, signOutUser } = useAuth()
 
   if (initializing) {
     return <div className="page-loading">Checking session...</div>
@@ -16,15 +16,6 @@ function ProtectedRoute({ children }) {
     return (
       <div className="page-loading">
         Please verify your email from your inbox, then sign in again.
-        <button className="ml-2 underline" onClick={signOutUser}>Sign out</button>
-      </div>
-    )
-  }
-
-  if (user && !phoneVerified) {
-    return (
-      <div className="page-loading">
-        Phone verification required. Complete the OTP step after logging in.
         <button className="ml-2 underline" onClick={signOutUser}>Sign out</button>
       </div>
     )
