@@ -1,4 +1,5 @@
 import React from "react";
+import "./account-card.css";
 
 const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl }) => {
   const maskAccountNumber = (number) => {
