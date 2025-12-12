@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import SignUp from './components/sign-up/sign-up'
 import Login from './components/login/login'
 import Dashboard from './components/dashboard/dashboard'
+import ProfilePage from './components/profile-page/profile-page'
 import { useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }) {
@@ -39,6 +40,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />
