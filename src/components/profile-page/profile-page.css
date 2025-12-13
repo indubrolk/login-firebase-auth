@@ -65,3 +65,48 @@
 .action-button:hover {
   background-color: #0056b3;
 }
+
+.action-button.danger {
+  background-color: #ef4444;
+}
+
+.action-button.danger:hover {
+  background-color: #dc2626;
+}
+
+.factor-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.factor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.mfa-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mfa-label {
+  display: grid;
+  gap: 6px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.mfa-label input {
+  padding: 10px 12px;
+  border: 1px solid #d7e1f0;
+  border-radius: 10px;
+  background: #fff;
+}
