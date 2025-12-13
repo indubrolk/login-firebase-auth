@@ -48,6 +48,7 @@ export default function Dashboard() {
     boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
     overflow: "hidden",
     border: "2px solid #fff",
+    cursor: "pointer",
   };
   const avatarImgStyle = { width: "100%", height: "100%", objectFit: "cover" };
   const avatarInitial = (displayName || user?.email || "U").charAt(0).toUpperCase();
@@ -66,10 +67,14 @@ export default function Dashboard() {
     navigate("/", { replace: true });
   };
 
+  const handleAvatarClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <div style={pageStyle}>
       <div style={headerBarStyle}>
-        <div style={avatarStyle} aria-label="Profile avatar">
+        <div style={avatarStyle} aria-label="Profile avatar" onClick={handleAvatarClick}>
           {user?.photoURL ? (
             <img src={user.photoURL} alt="Profile avatar" style={avatarImgStyle} />
           ) : (
