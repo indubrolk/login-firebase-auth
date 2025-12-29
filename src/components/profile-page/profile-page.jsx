@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import "./profile-page.css";
 import { useAuth } from "../../context/AuthContext";
 import { auth } from "../../firebase/firebase";
@@ -10,18 +10,14 @@ const ProfilePage = () => {
   const [verificationId, setVerificationId] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [status, setStatus] = useState({ loading: false, error: "", success: "" });
-  const [enrolledFactors, setEnrolledFactors] = useState(user?.multiFactor?.enrolledFactors || []);
-
-  useEffect(() => {
-    setEnrolledFactors(user?.multiFactor?.enrolledFactors || []);
-  }, [user]);
+  // Derive enrolled factors directly from current user; avoid setState in effects
+  const enrolledFactors = auth.currentUser?.multiFactor?.enrolledFactors || [];
 
   const friendlyEmail = useMemo(() => user?.email || "N/A", [user]);
   const friendlyName = useMemo(() => user?.displayName || "N/A", [user]);
 
   const refreshFactors = async () => {
     await auth.currentUser?.reload();
-    setEnrolledFactors(auth.currentUser?.multiFactor?.enrolledFactors || []);
   };
 
   const getRecaptchaVerifier = () => {
