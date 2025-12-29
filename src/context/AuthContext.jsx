@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
+    // Keep local auth state in sync with Firebase.
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setInitializing(false);
@@ -24,6 +25,7 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       initializing,
+      // Expose a single sign-out action for consumers.
       signOutUser: () => signOut(auth),
     }),
     [user, initializing]

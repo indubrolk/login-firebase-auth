@@ -14,6 +14,7 @@ function ProtectedRoute({ children }) {
   }
 
   if (user && !user.emailVerified) {
+    // Block access until the user's email is verified.
     return (
       <div className="page-loading">
         Please verify your email from your inbox, then sign in again.
@@ -23,6 +24,7 @@ function ProtectedRoute({ children }) {
   }
 
   if (!user) {
+    // Redirect unauthenticated users to the login screen.
     return <Navigate to="/" replace />
   }
 

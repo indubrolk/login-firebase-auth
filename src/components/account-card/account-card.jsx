@@ -8,6 +8,7 @@ const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl 
     return `****${lastFour}`;
   };
 
+  // Sample transaction data for the UI preview.
   const recentTransactions = [
     { id: 1, label: "Supermarket", date: "2023-10-15", amount: -85.5 },
     { id: 2, label: "Salary", date: "2023-10-14", amount: 2500.0 },
@@ -16,11 +17,13 @@ const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl 
     { id: 5, label: "Transfer In", date: "2023-10-11", amount: 300.0 },
   ];
 
+  // Summary values are mocked for now; replace with real analytics data.
   const monthlySummary = {
     spending: 1250.0,
     income: 3200.0,
   };
 
+  // CTA buttons are placeholders until feature flows are implemented.
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 px-6 py-10 flex items-center justify-center">
       <div className="relative w-full max-w-5xl overflow-hidden rounded-2xl border border-white/50 bg-white/70 p-8 shadow-2xl backdrop-blur-xl ring-1 ring-blue-100">

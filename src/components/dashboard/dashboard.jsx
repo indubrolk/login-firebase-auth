@@ -51,6 +51,7 @@ export default function Dashboard() {
     cursor: "pointer",
   };
   const avatarImgStyle = { width: "100%", height: "100%", objectFit: "cover" };
+  // Fallback avatar initial when no photo URL is present.
   const avatarInitial = (displayName || user?.email || "U").charAt(0).toUpperCase();
 
   // Mock data for account card - replace with real data from your backend

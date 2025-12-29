@@ -20,11 +20,13 @@ const ProfilePage = () => {
   const friendlyName = useMemo(() => user?.displayName || "N/A", [user]);
 
   const refreshFactors = async () => {
+    // Reload the user to pull the latest enrolled MFA factors.
     await auth.currentUser?.reload();
     setEnrolledFactors(auth.currentUser?.multiFactor?.enrolledFactors || []);
   };
 
   const getRecaptchaVerifier = () => {
+    // Reuse an invisible reCAPTCHA verifier for MFA enrollment.
     if (window.profileMfaRecaptchaVerifier) {
       return window.profileMfaRecaptchaVerifier;
     }
@@ -44,6 +46,7 @@ const ProfilePage = () => {
 
     setStatus({ loading: true, error: "", success: "" });
     try {
+      // Start phone MFA enrollment by sending an SMS code.
       const verifier = getRecaptchaVerifier();
       const mfaUser = multiFactor(auth.currentUser);
       const session = await mfaUser.getSession();
@@ -64,6 +67,7 @@ const ProfilePage = () => {
     }
     setStatus({ loading: true, error: "", success: "" });
     try {
+      // Confirm the SMS code and enroll the phone factor.
       const cred = PhoneAuthProvider.credential(verificationId, verificationCode.trim());
       const assertion = PhoneMultiFactorGenerator.assertion(cred);
       await multiFactor(auth.currentUser).enroll(assertion, "Phone");
