@@ -36,6 +36,24 @@ export default function Dashboard() {
     cursor: "pointer",
     boxShadow: "0 10px 24px rgba(0, 0, 0, 0.12)",
   };
+  const avatarStyle = {
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    backgroundColor: "#e2e8f0",
+    color: "#0f172a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 700,
+    boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+    overflow: "hidden",
+    border: "2px solid #fff",
+    cursor: "pointer",
+  };
+  const avatarImgStyle = { width: "100%", height: "100%", objectFit: "cover" };
+  // Fallback avatar initial when no photo URL is present.
+  const avatarInitial = (displayName || user?.email || "U").charAt(0).toUpperCase();
 
   const profileData = {
     userName: displayName,

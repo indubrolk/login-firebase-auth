@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -25,18 +25,13 @@ export default function Login() {
   const { user, initializing } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!initializing && user) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [user, initializing, navigate]);
-
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const getRecaptchaVerifier = () => {
+    // Cache a single invisible reCAPTCHA verifier for MFA challenges.
     if (window.loginRecaptchaVerifier) {
       return window.loginRecaptchaVerifier;
     }
@@ -53,6 +48,7 @@ export default function Login() {
       throw new Error("No phone factor available for MFA.");
     }
 
+    // Request a phone verification code for the user's enrolled MFA device.
     const verifier = getRecaptchaVerifier();
     const phoneProvider = new PhoneAuthProvider(auth);
     const verificationId = await phoneProvider.verifyPhoneNumber(
@@ -81,6 +77,7 @@ export default function Login() {
       const credential = await signInWithEmailAndPassword(auth, form.email, form.password);
 
       if (!credential.user.emailVerified) {
+        // Enforce email verification before allowing access.
         await sendEmailVerification(credential.user);
         await signOut(auth);
         setStatus({
@@ -91,6 +88,7 @@ export default function Login() {
         return;
       }
 
+      // Short delay to let users see the success message before redirecting.
       setStatus({
         loading: false,
         error: "",
@@ -100,6 +98,7 @@ export default function Login() {
     } catch (error) {
       if (error?.code === "auth/multi-factor-auth-required") {
         try {
+          // Start the MFA flow when Firebase requires a second factor.
           const resolver = getMultiFactorResolver(auth, error);
           await sendMfaCode(resolver);
         } catch (mfaError) {
@@ -134,6 +133,7 @@ export default function Login() {
 
     setStatus({ loading: true, error: "", success: "" });
     try {
+      // Resolve the sign-in with the provided MFA code.
       const credential = PhoneAuthProvider.credential(mfaStep.verificationId, mfaStep.code);
       const assertion = PhoneMultiFactorGenerator.assertion(credential);
       await mfaStep.resolver.resolveSignIn(assertion);
@@ -151,6 +151,16 @@ export default function Login() {
           <h2>Welcome back</h2>
           <p>Sign in to continue to your dashboard.</p>
         </div>
+
+        {!initializing && user && (
+          <p className="success-text">
+            You&apos;re already signed in.{" "}
+            <Link to="/dashboard">
+              Go to your dashboard
+            </Link>
+            .
+          </p>
+        )}
 
         {mfaStep.resolver ? (
           <form onSubmit={handleMfaSubmit} className="login-form">
