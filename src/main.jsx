@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    {/* App-level providers for routing and auth state. */}
     <BrowserRouter>
       <AuthProvider>
         <App />

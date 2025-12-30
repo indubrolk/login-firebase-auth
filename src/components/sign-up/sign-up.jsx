@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from "firebase/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { auth } from "../../firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 
@@ -8,13 +8,6 @@ export default function SignUp() {
     const [form, setForm] = useState({ displayName: "", email: "", password: "" });
     const [status, setStatus] = useState({ loading: false, error: "", success: "" });
     const { user, initializing } = useAuth();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!initializing && user) {
-            navigate("/dashboard", { replace: true });
-        }
-    }, [user, initializing, navigate]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -26,6 +19,7 @@ export default function SignUp() {
         setStatus({ loading: true, error: "", success: "" });
 
         try {
+            // Create the user and trigger email verification before allowing sign-in.
             const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
             if (form.displayName.trim()) {
                 await updateProfile(credential.user, { displayName: form.displayName.trim() });
@@ -52,6 +46,25 @@ export default function SignUp() {
                         Sign up to sync your profile across devices and access member-only features.
                     </p>
                 </div>
+
+                {!initializing && user && (
+                    <div className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <span>
+                            You&apos;re already signed in. Go to your{" "}
+                            <Link to="/dashboard" className="font-semibold text-amber-900 underline">
+                                dashboard
+                            </Link>{" "}
+                            or sign out to create a different account.
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => signOut(auth)}
+                            className="self-start rounded-lg border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+                        >
+                            Sign out
+                        </button>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <label className="block space-y-2">
