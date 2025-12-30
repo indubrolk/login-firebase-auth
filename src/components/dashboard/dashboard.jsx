@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ProfileCard from "../account-card/account-card";
+import ProfileImage from "../profile-image/ProfileImage";
 
 export default function Dashboard() {
   const { user, signOutUser } = useAuth();
@@ -54,13 +55,12 @@ export default function Dashboard() {
   // Fallback avatar initial when no photo URL is present.
   const avatarInitial = (displayName || user?.email || "U").charAt(0).toUpperCase();
 
-  // Mock data for account card - replace with real data from your backend
   const profileData = {
     userName: displayName,
-    accountNumber: "1234567890", // This will be masked as ****6789
+    accountNumber: "1234567890", // masked in card
     accountType: "Checking",
     balance: 2500.75,
-    avatarUrl: user?.photoURL || null, // Use Firebase photoURL if available
+    avatarUrl: user?.photoURL || null,
   };
 
   const handleSignOut = async () => {
@@ -68,20 +68,10 @@ export default function Dashboard() {
     navigate("/", { replace: true });
   };
 
-  const handleAvatarClick = () => {
-    navigate("/profile");
-  };
-
   return (
     <div style={pageStyle}>
       <div style={headerBarStyle}>
-        <div style={avatarStyle} aria-label="Profile avatar" onClick={handleAvatarClick}>
-          {user?.photoURL ? (
-            <img src={user.photoURL} alt="Profile avatar" style={avatarImgStyle} />
-          ) : (
-            avatarInitial
-          )}
-        </div>
+        <ProfileImage user={user} onSignOut={handleSignOut} />
         <button style={signOutStyle} onClick={handleSignOut}>
           Sign Out
         </button>
