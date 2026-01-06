@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ProfileCard from "../account-card/account-card";
 import ProfileImage from "../profile-image/ProfileImage";
+// Import the TransferModal component for funds transfer functionality
+import TransferModal from "../transfer-modal/TransferModal";
 
 export default function Dashboard() {
   const { user, signOutUser } = useAuth();
   const navigate = useNavigate();
+  // State to control the visibility of the transfer modal
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const displayName = user?.displayName || user?.email || "User";
   const pageStyle = {
@@ -77,14 +82,28 @@ export default function Dashboard() {
         </button>
       </div>
       <div style={cardWrapperStyle}>
+        {/* Pass callback function to open the transfer modal when Transfer button is clicked */}
         <ProfileCard
           userName={profileData.userName}
           accountNumber={profileData.accountNumber}
           accountType={profileData.accountType}
           balance={profileData.balance}
           avatarUrl={profileData.avatarUrl}
+          onTransferClick={() => setIsTransferModalOpen(true)}
         />
       </div>
+
+      {/* TransferModal component - renders the funds transfer interface */}
+      {/* isOpen: controls modal visibility */}
+      {/* onClose: callback to close the modal */}
+      {/* user: current authenticated user data */}
+      {/* is2FAEnabled: enables OTP verification for security */}
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        user={user}
+        is2FAEnabled={true}
+      />
     </div>
   );
 }
