@@ -1,7 +1,8 @@
 import React from "react";
 import "./account-card.css";
 
-const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl }) => {
+// Added onTransferClick prop to handle transfer button click from parent component
+const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl, onTransferClick }) => {
   const maskAccountNumber = (number) => {
     if (!number) return "";
     const lastFour = number.slice(-4);
@@ -135,9 +136,10 @@ const ProfileCard = ({ userName, accountNumber, accountType, balance, avatarUrl 
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row">
+          {/* Transfer button - calls onTransferClick to open the TransferModal */}
           <button
             className="group relative flex-1 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-            onClick={() => alert("Transfer functionality not implemented yet")}
+            onClick={onTransferClick}
           >
             <span className="absolute inset-y-0 left-[-120%] w-1/2 bg-white/20 blur-2xl transition group-hover:left-[120%]" />
             Transfer
